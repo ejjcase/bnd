@@ -6,6 +6,7 @@ import java.io.File;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -26,6 +27,7 @@ import org.gradle.api.initialization.Settings;
 import org.gradle.api.internal.plugins.DslObject;
 import org.gradle.api.invocation.Gradle;
 import org.gradle.api.plugins.ExtraPropertiesExtension;
+import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.Delete;
 import org.gradle.internal.metaobject.DynamicInvokeResult;
 import org.gradle.internal.metaobject.DynamicObject;
@@ -168,9 +170,13 @@ public class BndWorkspacePlugin implements Plugin<Object> {
 		/* Initialize the Bnd workspace */
 		Workspace.setDriver(Constants.BNDDRIVER_GRADLE);
 		Workspace.addGestalt(Constants.GESTALT_BATCH, null);
-		Workspace workspace = new Workspace(rootDir, cnf);
-		workspace.setOffline(startParameter.isOffline());
 		Gradle gradle = settings.getGradle();
+
+		Provider<BndWorkspaceService> bndWorkspaceServiceProvider = gradle.getSharedServices().registerIfAbsent("bndWorkspace", BndWorkspaceService.class, spec -> {
+			spec.getParameters().registerWorkspace(rootDir, cnf, startParameter.isOffline());
+		});
+
+		Workspace workspace = bndWorkspaceServiceProvider.get().getWorkspace(rootDir).get();
 		bndWorkspaceConfigure(workspace, gradle);
 
 		/*
@@ -239,6 +245,16 @@ public class BndWorkspacePlugin implements Plugin<Object> {
 		}
 	}
 
+	private static String initBndCnf(Project workspace) {
+		String bnd_cnf = (String) workspace.findProperty("bnd_cnf");
+		if (Objects.isNull(bnd_cnf)) {
+			// if not passed from settings
+			bnd_cnf = Workspace.CNFDIR;
+			workspace.getExtensions().getExtraProperties().set("bnd_cnf", bnd_cnf);
+		}
+		return bnd_cnf;
+	}
+
 	/**
 	 * Return the Bnd Workspace for the specified Gradle project.
 	 *
@@ -250,12 +266,7 @@ public class BndWorkspacePlugin implements Plugin<Object> {
 		ExtraPropertiesExtension ext = workspace.getExtensions()
 			.getExtraProperties();
 		/* Initialize the Bnd workspace */
-		String bnd_cnf = (String) workspace.findProperty("bnd_cnf");
-		if (Objects.isNull(bnd_cnf)) {
-			// if not passed from settings
-			bnd_cnf = Workspace.CNFDIR;
-			ext.set("bnd_cnf", bnd_cnf);
-		}
+		final String bnd_cnf = initBndCnf(workspace);
 		Workspace bndWorkspace = (Workspace) workspace.findProperty("bndWorkspace");
 		if (Objects.isNull(bndWorkspace)) {
 			// if not passed from settings
@@ -264,9 +275,10 @@ public class BndWorkspacePlugin implements Plugin<Object> {
 			Gradle gradle = workspace.getGradle();
 			File rootDir = unwrapFile(workspace.getLayout()
 				.getProjectDirectory());
-			bndWorkspace = new Workspace(rootDir, bnd_cnf);
-			bndWorkspace.setOffline(gradle.getStartParameter()
-				.isOffline());
+			Provider<BndWorkspaceService> bndWorkspaceServiceProvider = gradle.getSharedServices().registerIfAbsent("bndWorkspace", BndWorkspaceService.class, spec -> {
+				spec.getParameters().registerWorkspace(rootDir, bnd_cnf, gradle.getStartParameter().isOffline());
+			});
+			bndWorkspace = bndWorkspaceServiceProvider.get().getWorkspace(rootDir).get();
 			ext.set("bndWorkspace", bndWorkspace);
 			bndWorkspaceConfigure(bndWorkspace, gradle);
 		}
