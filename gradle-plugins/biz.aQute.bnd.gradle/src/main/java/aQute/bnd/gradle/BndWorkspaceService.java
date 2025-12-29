@@ -1,5 +1,6 @@
 package aQute.bnd.gradle;
 
+import aQute.bnd.build.Project;
 import aQute.bnd.build.Workspace;
 import org.gradle.api.Action;
 import org.gradle.api.provider.ListProperty;
@@ -19,12 +20,21 @@ import java.util.Optional;
  */
 public abstract class BndWorkspaceService implements BuildService<BndWorkspaceService.Params>, AutoCloseable {
 
-	public record WorkspaceInitializationData(File rootDir, String cnf, boolean isOffline) implements Serializable {
+	public record WorkspaceInitializationData(File rootDir, String cnf, boolean isOffline, boolean prepareProjects) implements Serializable {
 
 		private Workspace createWorkspace() {
 			try {
 				Workspace workspace = new Workspace(rootDir, cnf);
 				workspace.setOffline(isOffline);
+				if (prepareProjects) {
+					/*
+					 * Prepare each project in the workspace to establish complete
+					 * dependencies and dependents information.
+					 */
+					for (Project p : workspace.getAllProjects()) {
+						p.prepare();
+					}
+				}
 				return workspace;
 			} catch (Exception e) {
 				throw new RuntimeException(e);
@@ -41,8 +51,10 @@ public abstract class BndWorkspaceService implements BuildService<BndWorkspaceSe
 		 * @param rootDir The workspace's root directory.
 		 * @param cnf The path to the workspace's "cnf" project relative to {@code rootDir}.
 		 * @param isOffline Whether the workspace should be offline.
+		 * @param prepareProjects Whether to call {@link Project#prepare()} on all the workspace's projects when the
+		 *                        workspace is created.
 		 */
-		default void registerWorkspace(File rootDir, String cnf, boolean isOffline) {
+		default void registerWorkspace(File rootDir, String cnf, boolean isOffline, boolean prepareProjects) {
 			if (rootDir == null || !rootDir.isDirectory()) {
 				throw new IllegalArgumentException("rootDir must be an existing directory");
 			}
@@ -54,7 +66,7 @@ public abstract class BndWorkspaceService implements BuildService<BndWorkspaceSe
 					throw new IllegalStateException("A workspace at " + rootDir + " is already registered");
 				}
 			});
-			getWorkspaceInitializationData().add(new WorkspaceInitializationData(rootDir, cnf, isOffline));
+			getWorkspaceInitializationData().add(new WorkspaceInitializationData(rootDir, cnf, isOffline, prepareProjects));
 		}
 	}
 

@@ -173,19 +173,11 @@ public class BndWorkspacePlugin implements Plugin<Object> {
 		Gradle gradle = settings.getGradle();
 
 		Provider<BndWorkspaceService> bndWorkspaceServiceProvider = gradle.getSharedServices().registerIfAbsent("bndWorkspace", BndWorkspaceService.class, spec -> {
-			spec.getParameters().registerWorkspace(rootDir, cnf, startParameter.isOffline());
+			spec.getParameters().registerWorkspace(rootDir, cnf, startParameter.isOffline(), true);
 		});
 
 		Workspace workspace = bndWorkspaceServiceProvider.get().getWorkspace(rootDir).get();
 		bndWorkspaceConfigure(workspace, gradle);
-
-		/*
-		 * Prepare each project in the workspace to establish complete
-		 * dependencies and dependents information.
-		 */
-		for (aQute.bnd.build.Project p : workspace.getAllProjects()) {
-			p.prepare();
-		}
 
 		/* Add each project and its dependents to the graph */
 		Set<String> projectGraph = new LinkedHashSet<>();
@@ -276,7 +268,7 @@ public class BndWorkspacePlugin implements Plugin<Object> {
 			File rootDir = unwrapFile(workspace.getLayout()
 				.getProjectDirectory());
 			Provider<BndWorkspaceService> bndWorkspaceServiceProvider = gradle.getSharedServices().registerIfAbsent("bndWorkspace", BndWorkspaceService.class, spec -> {
-				spec.getParameters().registerWorkspace(rootDir, bnd_cnf, gradle.getStartParameter().isOffline());
+				spec.getParameters().registerWorkspace(rootDir, bnd_cnf, gradle.getStartParameter().isOffline(), false);
 			});
 			bndWorkspace = bndWorkspaceServiceProvider.get().getWorkspace(rootDir).get();
 			ext.set("bndWorkspace", bndWorkspace);
