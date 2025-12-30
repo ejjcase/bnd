@@ -187,47 +187,23 @@ public class BndPlugin implements Plugin<Project> {
 				.getFiles();
 
 			/* Set up Bnd generate support */
-			Optional<TaskProvider<Task>> generate = bndProject.getGenerate()
+			Optional<TaskProvider<Generate>> generate = bndProject.getGenerate()
 				.getInputs()
 				.value()
 				.filter(files -> !files.isEmpty())
-				.map(files -> tasks.register("generate", t -> {
+				.map(files -> tasks.register("generate", Generate.class, t -> {
 					t.setDescription("Generate source code");
 					t.setGroup(LifecycleBasePlugin.BUILD_GROUP);
-					t.getInputs()
-						.files(files)
-						.withPathSensitivity(RELATIVE)
-						.withPropertyName("generateInputs");
+					t.getGenerateInputs().from(files);
 					/* bnd can include from -dependson */
-					t.getInputs()
-						.files(getBuildDependencies(JavaPlugin.JAR_TASK_NAME))
-						.withPropertyName("buildDependencies");
+					t.getBuildDependencies().from(getBuildDependencies(JavaPlugin.JAR_TASK_NAME));
 					/*
 					 * Workspace and project configuration changes should
 					 * trigger task
 					 */
-					t.getInputs()
-						.files(bndConfiguration())
-						.withPathSensitivity(RELATIVE)
-						.withPropertyName("bndConfiguration")
-						.normalizeLineEndings();
+					t.getBndConfiguration().from(bndConfiguration());
 
-					t.getOutputs()
-						.dirs(bndProject.getGenerate()
-							.getOutputDirs())
-						.withPropertyName("generateOutputs");
-					t.doLast("generate", new Action<>() {
-						@Override
-						public void execute(Task tt) {
-							try {
-								bndProject.getGenerate()
-									.generate(false);
-							} catch (Exception e) {
-								throw new GradleException(String.format("Project %s failed to generate", bndProject.getName()), e);
-							}
-							checkErrors(tt.getLogger());
-						}
-					});
+					t.getGenerateOutputs().value(bndProject.getGenerate().getOutputDirs());
 				}));
 			Optional<Action<Task>> generateInputAction = generate.map(generateTask -> t -> {
 				t.getInputs()
