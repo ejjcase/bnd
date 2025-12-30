@@ -78,12 +78,11 @@ import org.gradle.work.NormalizeLineEndings;
  * </ul>
  */
 @DisableCachingByDefault(because = "Abstract base class; not used directly")
-public abstract class AbstractBndrun extends DefaultTask {
+public abstract class AbstractBndrun extends AbstractBndTask {
 	private final RegularFileProperty			bndrun;
 	private final ConfigurableFileCollection	bundles;
 	private boolean								ignoreFailures	= false;
 	private final DirectoryProperty				workingDirectory;
-	private final String						projectName;
 	private final Provider<String>				targetVersion;
 	private final FileCollection				artifacts;
 	private final MapProperty<String, Object>	properties;
@@ -211,11 +210,6 @@ public abstract class AbstractBndrun extends DefaultTask {
 	}
 
 	@Internal
-	String getProjectName() {
-		return projectName;
-	}
-
-	@Internal
 	Provider<String> getTargetVersion() {
 		return targetVersion;
 	}
@@ -230,34 +224,18 @@ public abstract class AbstractBndrun extends DefaultTask {
 		return offline;
 	}
 
-	@ServiceReference
-	@org.gradle.api.tasks.Optional
-	public abstract Property<BndWorkspaceService> getBndWorkspaceService();
-
-	@Internal
-	Optional<Workspace> getBndWorkspace() {
-		return unwrapOptional(getBndWorkspaceService())
-			.flatMap(service -> service.getAncestorWorkspace(getProject().getProjectDir()));
-	}
-
-	@Internal
-	Optional<Project> getBndProject() {
-		return getBndWorkspace().map(ws -> ws.getProject(getProjectName()));
-	}
-
 	/**
 	 * Create a Bndrun task.
 	 */
 	public AbstractBndrun() {
 		super();
 		org.gradle.api.Project project = getProject();
-		projectName = project.getName();
 		ObjectFactory objects = project.getObjects();
 		bndrun = objects.fileProperty();
 		DirectoryProperty temporaryDirProperty = objects.directoryProperty()
 			.fileValue(getTemporaryDir());
 		workingDirectory = objects.directoryProperty()
-			.convention(temporaryDirProperty.dir(projectName));
+			.convention(temporaryDirProperty.dir(getProjectName()));
 		bundles = objects.fileCollection();
 		SourceSet mainSourceSet = sourceSets(project).getByName(SourceSet.MAIN_SOURCE_SET_NAME);
 		targetVersion = project.getTasks()
