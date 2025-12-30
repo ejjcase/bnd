@@ -88,7 +88,6 @@ public abstract class AbstractBndrun extends DefaultTask {
 	private final FileCollection				artifacts;
 	private final MapProperty<String, Object>	properties;
 	private final Property<Boolean>				offline;
-	private final Property<Project>				bndProject;
 
 	/**
 	 * The bndrun file for the execution.
@@ -242,8 +241,8 @@ public abstract class AbstractBndrun extends DefaultTask {
 	}
 
 	@Internal
-	Provider<Project> getBndProject() {
-		return bndProject;
+	Optional<Project> getBndProject() {
+		return getBndWorkspace().map(ws -> ws.getProject(getProjectName()));
 	}
 
 	/**
@@ -276,19 +275,12 @@ public abstract class AbstractBndrun extends DefaultTask {
 			.convention(Boolean.valueOf(project.getGradle()
 				.getStartParameter()
 				.isOffline()));
-		bndProject = objects.property(Project.class);
 
 		Optional<Workspace> bndWorkspace = getBndWorkspace();
 		if (bndWorkspace.isPresent()) {
 			// bundles and properties must not be used for Bnd workspace builds
 			bundles.disallowChanges();
 			properties.disallowChanges();
-			if (project.getPluginManager()
-				.hasPlugin(BndPlugin.PLUGINID)) {
-				BndPluginExtension extension = project.getExtensions()
-					.getByType(BndPluginExtension.class);
-				bndProject.value(extension.getProject());
-			}
 			offline.value(bndWorkspace.get().isOffline());
 		} else {
 			bundles(mainSourceSet.getRuntimeClasspath());
@@ -352,7 +344,7 @@ public abstract class AbstractBndrun extends DefaultTask {
 	@TaskAction
 	public void bndrunAction() throws Exception {
 		File bndrunFile = unwrapFile(getBndrun());
-		Optional<Project> project = unwrapOptional(getBndProject());
+		Optional<Project> project = getBndProject();
 		if (project.map(Processor::getPropertiesFile)
 			.filter(bndrunFile::equals)
 			.isPresent()) {
