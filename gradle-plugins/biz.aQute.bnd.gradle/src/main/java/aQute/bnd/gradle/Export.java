@@ -76,7 +76,7 @@ import org.gradle.api.tasks.OutputDirectory;
  * </ul>
  */
 @CacheableTask
-public class Export extends AbstractBndrun {
+public abstract class Export extends AbstractBndrun {
 	private final DirectoryProperty	destinationDirectory;
 	private final Property<String>	exporter;
 

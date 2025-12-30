@@ -67,7 +67,7 @@ import org.osgi.service.resolver.ResolutionException;
  * </ul>
  */
 @CacheableTask
-public class Resolve extends AbstractBndrun {
+public abstract class Resolve extends AbstractBndrun {
 	private boolean						failOnChanges	= false;
 	private final RegularFileProperty	outputBndrun;
 	private boolean						reportOptional	= true;

@@ -44,6 +44,13 @@ public abstract class BndWorkspaceService implements BuildService<BndWorkspaceSe
 
 	private final Map<File, Workspace> workspaces = new LinkedHashMap<>(1);
 
+	/**
+	 * Get the {@link Workspace} registered for a given root directory, if any.
+	 * This method creates the {@link Workspace} if it does not already exist.
+	 * @param rootDir A workspace root directory.
+	 * @return The associated {@link Workspace}, or an empty optional if no
+	 * workspace has been registered for the given root directory.
+	 */
 	public Optional<Workspace> getWorkspace(File rootDir) {
 		if (workspaces.containsKey(rootDir)) {
 			return Optional.of(workspaces.get(rootDir));
@@ -55,6 +62,32 @@ public abstract class BndWorkspaceService implements BuildService<BndWorkspaceSe
 			Workspace workspace = config.get().createWorkspace();
 			workspaces.put(rootDir, workspace);
 			return Optional.of(workspace);
+		}
+		return Optional.empty();
+	}
+
+	/**
+	 * Get the {@link Workspace} registered for a given directory, if any,
+	 * or for the nearest ancestor within the Gradle multi-project build
+	 * for which a {@link Workspace} has been registered. This method creates
+	 * the {@link Workspace} if it does not already exist.
+	 * @param projectDir A directory.
+	 * @return The associated {@link Workspace} for the given directory or an
+	 * ancestor, or an empty optional if no such workspace has been registered.
+	 */
+	public Optional<Workspace> getAncestorWorkspace(File projectDir) {
+		File potentialWorkspaceRootDir = projectDir;
+		while (potentialWorkspaceRootDir != null) {
+			Optional<Workspace> workspace = getWorkspace(potentialWorkspaceRootDir);
+			if (workspace.isPresent()) {
+				return workspace;
+			}
+			if (new File(potentialWorkspaceRootDir, "settings.gradle.kts").isFile()
+				|| new File(potentialWorkspaceRootDir, "settings.gradle").isFile()) {
+				// The directory is a Gradle project root; no point in recursing past here.
+				break;
+			}
+			potentialWorkspaceRootDir = potentialWorkspaceRootDir.getParentFile();
 		}
 		return Optional.empty();
 	}

@@ -42,6 +42,7 @@ import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.provider.MapProperty;
 import org.gradle.api.provider.Property;
 import org.gradle.api.provider.Provider;
+import org.gradle.api.services.ServiceReference;
 import org.gradle.api.tasks.Classpath;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputFile;
@@ -88,7 +89,6 @@ public abstract class AbstractBndrun extends DefaultTask {
 	private final MapProperty<String, Object>	properties;
 	private final Property<Boolean>				offline;
 	private final Property<Project>				bndProject;
-	private final Property<Workspace>			bndWorkspace;
 
 	/**
 	 * The bndrun file for the execution.
@@ -231,9 +231,14 @@ public abstract class AbstractBndrun extends DefaultTask {
 		return offline;
 	}
 
+	@ServiceReference
+	@org.gradle.api.tasks.Optional
+	public abstract Property<BndWorkspaceService> getBndWorkspaceService();
+
 	@Internal
-	Provider<Workspace> getBndWorkspace() {
-		return bndWorkspace;
+	Optional<Workspace> getBndWorkspace() {
+		return unwrapOptional(getBndWorkspaceService())
+			.flatMap(service -> service.getAncestorWorkspace(getProject().getProjectDir()));
 	}
 
 	@Internal
@@ -271,10 +276,9 @@ public abstract class AbstractBndrun extends DefaultTask {
 			.convention(Boolean.valueOf(project.getGradle()
 				.getStartParameter()
 				.isOffline()));
-		bndWorkspace = objects.property(Workspace.class)
-			.value((Workspace) project.findProperty("bndWorkspace"));
 		bndProject = objects.property(Project.class);
 
+		Optional<Workspace> bndWorkspace = getBndWorkspace();
 		if (bndWorkspace.isPresent()) {
 			// bundles and properties must not be used for Bnd workspace builds
 			bundles.disallowChanges();
@@ -285,7 +289,7 @@ public abstract class AbstractBndrun extends DefaultTask {
 					.getByType(BndPluginExtension.class);
 				bndProject.value(extension.getProject());
 			}
-			offline.value(bndWorkspace.map(ws -> Boolean.valueOf(ws.isOffline())));
+			offline.value(bndWorkspace.get().isOffline());
 		} else {
 			bundles(mainSourceSet.getRuntimeClasspath());
 			bundles(artifacts);
@@ -356,7 +360,7 @@ public abstract class AbstractBndrun extends DefaultTask {
 			return;
 		}
 		File workingDirFile = unwrapFile(getWorkingDirectory());
-		Optional<Workspace> workspace = unwrapOptional(getBndWorkspace());
+		Optional<Workspace> workspace = getBndWorkspace();
 		try (biz.aQute.resolve.Bndrun run = createBndrun(workspace.orElse(null), bndrunFile)) {
 			Workspace runWorkspace = run.getWorkspace();
 			IO.mkdirs(workingDirFile);

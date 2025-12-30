@@ -68,7 +68,7 @@ import org.gradle.jvm.toolchain.JavaToolchainService;
  * </ul>
  */
 @CacheableTask
-public class TestOSGi extends AbstractBndrun {
+public abstract class TestOSGi extends AbstractBndrun {
 	/**
 	 * Option to specify test names.
 	 */

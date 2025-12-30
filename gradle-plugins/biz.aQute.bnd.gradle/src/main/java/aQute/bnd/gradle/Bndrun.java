@@ -57,7 +57,7 @@ import org.gradle.work.DisableCachingByDefault;
  * </ul>
  */
 @DisableCachingByDefault(because = "Task executes bndrun")
-public class Bndrun extends AbstractBndrun {
+public abstract class Bndrun extends AbstractBndrun {
 	private final Property<JavaLauncher> javaLauncher;
 
 	/**
