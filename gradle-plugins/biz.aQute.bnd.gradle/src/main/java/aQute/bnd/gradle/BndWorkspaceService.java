@@ -1,16 +1,15 @@
 package aQute.bnd.gradle;
 
-import aQute.bnd.build.Project;
 import aQute.bnd.build.Workspace;
-import aQute.bnd.osgi.Constants;
+import org.gradle.api.Action;
 import org.gradle.api.provider.ListProperty;
 import org.gradle.api.services.BuildService;
 import org.gradle.api.services.BuildServiceParameters;
 
 import java.io.File;
-import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -19,55 +18,27 @@ import java.util.Optional;
  */
 public abstract class BndWorkspaceService implements BuildService<BndWorkspaceService.Params>, AutoCloseable {
 
-	public record WorkspaceInitializationData(File rootDir, String cnf, boolean isOffline, boolean prepareProjects) implements Serializable {
+	/**
+	 * Parameters for configuring {@link BndWorkspaceService}.
+	 */
+	public static abstract class Params implements BuildServiceParameters {
 
-		private Workspace createWorkspace() {
-			try {
-				Workspace.setDriver(Constants.BNDDRIVER_GRADLE);
-				Workspace.addGestalt(Constants.GESTALT_BATCH, null);
-				Workspace workspace = new Workspace(rootDir, cnf);
-				workspace.setOffline(isOffline);
-				if (prepareProjects) {
-					/*
-					 * Prepare each project in the workspace to establish complete
-					 * dependencies and dependents information.
-					 */
-					for (Project p : workspace.getAllProjects()) {
-						p.prepare();
-					}
-				}
-				return workspace;
-			} catch (Exception e) {
-				throw new RuntimeException(e);
-			}
-		}
-	}
-
-	public interface Params extends BuildServiceParameters {
-
-		ListProperty<WorkspaceInitializationData> getWorkspaceInitializationData();
+		public abstract ListProperty<WorkspaceConfig> getWorkspaceConfigs();
 
 		/**
 		 * Register a {@link Workspace} to be created on demand.
-		 * @param rootDir The workspace's root directory.
-		 * @param cnf The path to the workspace's "cnf" project relative to {@code rootDir}.
-		 * @param isOffline Whether the workspace should be offline.
-		 * @param prepareProjects Whether to call {@link Project#prepare()} on all the workspace's projects when the
-		 *                        workspace is created.
+		 * @param rootDir The workspace root directory.
+		 * @param configAction Configures the workspace.
 		 */
-		default void registerWorkspace(File rootDir, String cnf, boolean isOffline, boolean prepareProjects) {
-			if (rootDir == null || !rootDir.isDirectory()) {
-				throw new IllegalArgumentException("rootDir must be an existing directory");
-			}
-			if (cnf == null || !new File(rootDir, cnf).isDirectory()) {
-				throw new IllegalArgumentException("cnf must be an existing directory relative to rootDir");
-			}
-			getWorkspaceInitializationData().get().forEach(existingData -> {
-				if (existingData.rootDir().equals(rootDir)) {
+		public void registerWorkspace(File rootDir, Action<WorkspaceConfig> configAction) {
+			getWorkspaceConfigs().get().forEach(existingConfig -> {
+				if (Objects.equals(rootDir, existingConfig.getRootDir())) {
 					throw new IllegalStateException("A workspace at " + rootDir + " is already registered");
 				}
 			});
-			getWorkspaceInitializationData().add(new WorkspaceInitializationData(rootDir, cnf, isOffline, prepareProjects));
+			WorkspaceConfig workspaceConfig = new WorkspaceConfig(rootDir);
+			configAction.execute(workspaceConfig);
+			getWorkspaceConfigs().add(workspaceConfig);
 		}
 	}
 
@@ -77,11 +48,11 @@ public abstract class BndWorkspaceService implements BuildService<BndWorkspaceSe
 		if (workspaces.containsKey(rootDir)) {
 			return Optional.of(workspaces.get(rootDir));
 		}
-		Optional<WorkspaceInitializationData> data = getParameters().getWorkspaceInitializationData().get().stream()
-			.filter(d -> rootDir.equals(d.rootDir()))
+		Optional<WorkspaceConfig> config = getParameters().getWorkspaceConfigs().get().stream()
+			.filter(d -> rootDir.equals(d.getRootDir()))
 			.findFirst();
-		if (data.isPresent()) {
-			Workspace workspace = data.get().createWorkspace();
+		if (config.isPresent()) {
+			Workspace workspace = config.get().createWorkspace();
 			workspaces.put(rootDir, workspace);
 			return Optional.of(workspace);
 		}
