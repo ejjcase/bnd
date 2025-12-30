@@ -2,9 +2,8 @@ package aQute.bnd.gradle;
 
 import aQute.bnd.build.Project;
 import aQute.bnd.build.Workspace;
-import org.gradle.api.Action;
+import aQute.bnd.osgi.Constants;
 import org.gradle.api.provider.ListProperty;
-import org.gradle.api.provider.MapProperty;
 import org.gradle.api.services.BuildService;
 import org.gradle.api.services.BuildServiceParameters;
 
@@ -24,6 +23,8 @@ public abstract class BndWorkspaceService implements BuildService<BndWorkspaceSe
 
 		private Workspace createWorkspace() {
 			try {
+				Workspace.setDriver(Constants.BNDDRIVER_GRADLE);
+				Workspace.addGestalt(Constants.GESTALT_BATCH, null);
 				Workspace workspace = new Workspace(rootDir, cnf);
 				workspace.setOffline(isOffline);
 				if (prepareProjects) {

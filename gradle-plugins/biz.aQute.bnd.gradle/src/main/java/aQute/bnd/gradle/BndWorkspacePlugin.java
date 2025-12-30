@@ -168,8 +168,6 @@ public class BndWorkspacePlugin implements Plugin<Object> {
 		});
 
 		/* Initialize the Bnd workspace */
-		Workspace.setDriver(Constants.BNDDRIVER_GRADLE);
-		Workspace.addGestalt(Constants.GESTALT_BATCH, null);
 		Gradle gradle = settings.getGradle();
 
 		Provider<BndWorkspaceService> bndWorkspaceServiceProvider = gradle.getSharedServices().registerIfAbsent("bndWorkspace", BndWorkspaceService.class, spec -> {
@@ -262,8 +260,6 @@ public class BndWorkspacePlugin implements Plugin<Object> {
 		Workspace bndWorkspace = (Workspace) workspace.findProperty("bndWorkspace");
 		if (Objects.isNull(bndWorkspace)) {
 			// if not passed from settings
-			Workspace.setDriver(Constants.BNDDRIVER_GRADLE);
-			Workspace.addGestalt(Constants.GESTALT_BATCH, null);
 			Gradle gradle = workspace.getGradle();
 			File rootDir = unwrapFile(workspace.getLayout()
 				.getProjectDirectory());
