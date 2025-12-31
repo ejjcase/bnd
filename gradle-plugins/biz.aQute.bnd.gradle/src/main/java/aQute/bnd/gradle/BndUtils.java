@@ -8,6 +8,7 @@ import java.util.function.BiFunction;
 import aQute.service.reporter.Report;
 import aQute.service.reporter.Report.Location;
 import org.gradle.api.Buildable;
+import org.gradle.api.GradleException;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
 import org.gradle.api.artifacts.ArtifactView;
@@ -236,5 +237,34 @@ public class BndUtils {
 			.getToolchain();
 		JavaToolchainService service = extensions.getByType(JavaToolchainService.class);
 		return tool.apply(service, toolchain);
+	}
+
+	/**
+	 * Log a status report and optionally fail if any errors have occurred.
+	 * @param project A Bnd project.
+	 * @param logger A Gradle logger.
+	 * @param failOnError Whether to fail the task if there are errors.
+	 */
+	public static void checkProjectErrors(aQute.bnd.build.Project project, Logger logger, boolean failOnError) {
+		project.getInfo(project.getWorkspace(), project.getWorkspace()
+			.getBase()
+			.getName()
+			.concat(" :"));
+		boolean failed = !failOnError && !project.isOk();
+		int errorCount = project.getErrors()
+			.size();
+		logReport(project, logger);
+		project.clear();
+		if (failed) {
+			String str;
+			if (errorCount == 1) {
+				str = "%s has errors, one error was reported";
+			} else if (errorCount > 1) {
+				str = "%s has errors, %s errors were reported";
+			} else {
+				str = "%s has errors even though no errors were reported";
+			}
+			throw new GradleException(String.format(str, project.getName(), errorCount));
+		}
 	}
 }

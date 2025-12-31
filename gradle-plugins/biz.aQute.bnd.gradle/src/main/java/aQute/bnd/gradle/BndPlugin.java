@@ -1,8 +1,8 @@
 package aQute.bnd.gradle;
 
+import static aQute.bnd.gradle.BndUtils.checkProjectErrors;
 import static aQute.bnd.gradle.BndUtils.isGradleCompatible;
 import static aQute.bnd.gradle.BndUtils.jarLibraryElements;
-import static aQute.bnd.gradle.BndUtils.logReport;
 import static aQute.bnd.gradle.BndUtils.sourceSets;
 import static aQute.bnd.gradle.BndUtils.unwrap;
 import static aQute.bnd.gradle.BndUtils.unwrapFile;
@@ -371,6 +371,11 @@ public class BndPlugin implements Plugin<Project> {
 				.getByType(JavaPluginExtension.class);
 			javacSource.ifPresent(javaPlugin::setSourceCompatibility);
 			javacTarget.ifPresent(javaPlugin::setTargetCompatibility);
+
+			final JavaCompileCheckErrorsAction javaCompileCheckErrorsAction = objects.newInstance(JavaCompileCheckErrorsAction.class);
+			javaCompileCheckErrorsAction.getProjectDir().set(project.getProjectDir());
+			javaCompileCheckErrorsAction.getProjectName().set(project.getName());
+
 			tasks.withType(JavaCompile.class)
 				.configureEach(t -> {
 					CompileOptions options = t.getOptions();
@@ -418,36 +423,7 @@ public class BndPlugin implements Plugin<Project> {
 					}
 					options.getCompilerArgumentProviders()
 						.add(argProvider(javacProfile.map(profile -> Arrays.asList("-profile", profile))));
-					t.doFirst("checkErrors", new Action<>() {
-						@Override
-						public void execute(Task tt) {
-							Logger logger = tt.getLogger();
-							checkErrors(logger);
-							if (logger.isInfoEnabled()) {
-								logger.info("Compile to {}", unwrapFile(t.getDestinationDirectory()));
-								if (t.getOptions()
-									.getRelease()
-									.isPresent()) {
-									logger.info("--release {} {}", unwrap(t.getOptions()
-										.getRelease()), Strings.join(" ",
-											t.getOptions()
-												.getAllCompilerArgs()));
-								} else {
-									logger.info("-source {} -target {} {}", t.getSourceCompatibility(),
-										t.getTargetCompatibility(), Strings.join(" ", t.getOptions()
-											.getAllCompilerArgs()));
-								}
-								logger.info("-classpath {}", t.getClasspath()
-									.getAsPath());
-								if (Objects.nonNull(t.getOptions()
-									.getBootstrapClasspath())) {
-									logger.info("-bootclasspath {}", t.getOptions()
-										.getBootstrapClasspath()
-										.getAsPath());
-								}
-							}
-						}
-					});
+					t.doFirst("checkErrors", javaCompileCheckErrorsAction);
 				});
 
 			TaskProvider<AbstractArchiveTask> jar = tasks.named(JavaPlugin.JAR_TASK_NAME, AbstractArchiveTask.class,
@@ -986,29 +962,6 @@ public class BndPlugin implements Plugin<Project> {
 
 	private void checkErrors(Logger logger, boolean ignoreFailures) {
 		checkProjectErrors(bndProject, logger, ignoreFailures);
-	}
-
-	private void checkProjectErrors(aQute.bnd.build.Project p, Logger logger, boolean ignoreFailures) {
-		p.getInfo(p.getWorkspace(), p.getWorkspace()
-			.getBase()
-			.getName()
-			.concat(" :"));
-		boolean failed = !ignoreFailures && !p.isOk();
-		int errorCount = p.getErrors()
-			.size();
-		logReport(p, logger);
-		p.clear();
-		if (failed) {
-			String str;
-			if (errorCount == 1) {
-				str = "%s has errors, one error was reported";
-			} else if (errorCount > 1) {
-				str = "%s has errors, %s errors were reported";
-			} else {
-				str = "%s has errors even though no errors were reported";
-			}
-			throw new GradleException(String.format(str, p.getName(), errorCount));
-		}
 	}
 
 	private Optional<String> optional(String value) {
