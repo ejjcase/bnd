@@ -546,49 +546,15 @@ public class BndPlugin implements Plugin<Project> {
 						.setInitialCount((int) count);
 				});
 
-			TaskProvider<Task> release = tasks.register("release", t -> {
+			TaskProvider<Release> release = tasks.register("release", Release.class, t -> {
 				t.setDescription("Release this project to the release repository.");
 				t.setGroup(PublishingPlugin.PUBLISH_TASK_GROUP);
 
 				boolean enabled = !bndProject.isNoBundles() && !bndProject.getProperty(Constants.RELEASEREPO, "unset")
 					.isEmpty();
 				t.setEnabled(enabled);
-				t.getInputs()
-					.files(jar)
-					.withPropertyName(jar.getName());
 
-			    // Declare the service usage for correctness w/ parallel execution + configuration cache
-			    t.usesService(releaseCounter);
-
-
-				t.doLast("release", new Action<>() {
-					@Override
-					public void execute(Task tt) {
-						try {
-
-							int count = releaseCounter.get()
-								.getRemaining();
-							boolean isLastBundle = releaseCounter.get()
-								.isLastReleaseTask();
-
-							if (!isLastBundle) {
-								tt.getLogger()
-									.lifecycle("bnd: Release bundle ({}) {}", count, jar.getName());
-								bndProject.release();
-							} else {
-								// releasing last bundle in workspace (special
-								// case for sonatype release)
-								tt.getLogger()
-									.lifecycle("bnd: Last release bundle ({}) {}", count, jar.getName());
-								bndProject.release(new ReleaseParameter(null, false, true));
-							}
-						} catch (Exception e) {
-							throw new GradleException(
-								String.format("Project %s failed to release", bndProject.getName()), e);
-						}
-						checkErrors(tt.getLogger());
-					}
-				});
+				t.getJar().from(jar);
 			});
 
 			TaskProvider<Task> releaseDependencies = tasks.register("releaseDependencies", t -> {
