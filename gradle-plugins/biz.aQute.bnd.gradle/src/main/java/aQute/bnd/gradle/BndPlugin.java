@@ -939,7 +939,7 @@ public class BndPlugin implements Plugin<Project> {
 			.collect(toList());
 	}
 
-	private <ITERABLE extends Iterable<String>> CommandLineArgumentProvider argProvider(Optional<ITERABLE> provider) {
+	private static <ITERABLE extends Iterable<String>> CommandLineArgumentProvider argProvider(Optional<ITERABLE> provider) {
 		return new CommandLineArgumentProvider() {
 			@SuppressWarnings("unchecked")
 			@Override
@@ -964,7 +964,7 @@ public class BndPlugin implements Plugin<Project> {
 		checkProjectErrors(bndProject, logger, ignoreFailures);
 	}
 
-	private Optional<String> optional(String value) {
+	private static Optional<String> optional(String value) {
 		return Optional.ofNullable(value).filter(Strings::notEmpty);
 	}
 
