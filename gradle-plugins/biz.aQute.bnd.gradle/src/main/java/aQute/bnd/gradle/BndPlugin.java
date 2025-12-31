@@ -372,9 +372,7 @@ public class BndPlugin implements Plugin<Project> {
 			javacSource.ifPresent(javaPlugin::setSourceCompatibility);
 			javacTarget.ifPresent(javaPlugin::setTargetCompatibility);
 
-			final JavaCompileCheckErrorsAction javaCompileCheckErrorsAction = objects.newInstance(JavaCompileCheckErrorsAction.class);
-			javaCompileCheckErrorsAction.getProjectDir().set(project.getProjectDir());
-			javaCompileCheckErrorsAction.getProjectName().set(project.getName());
+			final JavaCompileCheckErrorsAction javaCompileCheckErrorsAction = createBndGradleObject(JavaCompileCheckErrorsAction.class);
 
 			tasks.withType(JavaCompile.class)
 				.configureEach(t -> {
@@ -497,29 +495,7 @@ public class BndPlugin implements Plugin<Project> {
 						.file(layout.getBuildDirectory()
 							.file(Constants.BUILDFILES))
 						.withPropertyName("buildfiles");
-					t.doLast("build", new Action<>() {
-						@Override
-						public void execute(Task tt) {
-							File[] built;
-							try {
-								built = bndProject.build();
-								if (Objects.nonNull(built)) {
-									long now = System.currentTimeMillis();
-									for (File f : built) {
-										f.setLastModified(now);
-									}
-								}
-							} catch (Exception e) {
-								throw new GradleException(
-									String.format("Project %s failed to build", bndProject.getName()), e);
-							}
-							checkErrors(tt.getLogger());
-							if (Objects.nonNull(built)) {
-								tt.getLogger()
-									.info("Generated bundles: {}", (Object) built);
-							}
-						}
-					});
+					t.doLast("build", createBndGradleObject(BndBuildAction.class));
 				});
 
 			TaskProvider<Task> jarDependencies = tasks.register("jarDependencies", t -> {
@@ -983,5 +959,12 @@ public class BndPlugin implements Plugin<Project> {
 			logger.debug("Could not find getter method for field {}", name, e);
 		}
 		return null;
+	}
+
+	private <T extends AbstractBndGradleObject> T createBndGradleObject(Class<T> klass) {
+		T obj = objects.newInstance(klass);
+		obj.getProjectDir().set(project.getProjectDir());
+		obj.getProjectName().set(project.getName());
+		return obj;
 	}
 }
