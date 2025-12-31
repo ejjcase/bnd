@@ -7,6 +7,10 @@ import org.gradle.api.provider.Property;
 import org.gradle.api.services.ServiceReference;
 import org.gradle.api.tasks.Internal;
 
+import javax.inject.Inject;
+
+import static aQute.bnd.gradle.BndUtils.checkProjectErrors;
+
 /**
  * Base class for Gradle objects that require access to a Bnd
  * project and workspace.
@@ -26,6 +30,13 @@ public abstract class AbstractBndGradleObject {
 	public abstract DirectoryProperty getProjectDir();
 
 	/**
+	 * @return Whether {@link #checkErrors(Logger)} should fail the task
+	 * if Bnd errors are found.
+	 */
+	@Internal
+	public abstract Property<Boolean> getFailOnError();
+
+	/**
 	 * @return Gives access to the Bnd workspace and projects.
 	 */
 	@ServiceReference
@@ -42,10 +53,7 @@ public abstract class AbstractBndGradleObject {
 	}
 
 	protected void checkErrors(Logger logger) {
-		checkErrors(logger, false);
+		checkProjectErrors(getBndProject(), logger, getFailOnError().orElse(false).get());
 	}
 
-	protected void checkErrors(Logger logger, boolean failOnError) {
-		BndUtils.checkProjectErrors(getBndProject(), logger, failOnError);
-	}
 }

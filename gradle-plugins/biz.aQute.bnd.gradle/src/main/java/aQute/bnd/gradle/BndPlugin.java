@@ -609,12 +609,7 @@ public class BndPlugin implements Plugin<Project> {
 				t.getInputs()
 					.files(getBuildDependencies(JavaPlugin.JAR_TASK_NAME))
 					.withPropertyName("buildDependencies");
-				t.doFirst("checkErrors", new Action<>() {
-					@Override
-					public void execute(Task tt) {
-						checkErrors(tt.getLogger(), t.getIgnoreFailures());
-					}
-				});
+				t.doFirst("checkErrors", createCheckErrorsAction(!t.getIgnoreFailures()));
 			});
 
 			TaskProvider<TestOSGi> testOSGi = tasks.register("testOSGi", TestOSGi.class, t -> {
@@ -966,5 +961,24 @@ public class BndPlugin implements Plugin<Project> {
 		obj.getProjectDir().set(project.getProjectDir());
 		obj.getProjectName().set(project.getName());
 		return obj;
+	}
+
+	private Action<Task> createCheckErrorsAction(boolean failOnError) {
+		GenericCheckErrorsAction action = createBndGradleObject(GenericCheckErrorsAction.class);
+		action.getFailOnError().set(failOnError);
+		return action;
+	}
+
+	/**
+	 * Action that checks for Bnd errors, optionally failing.
+	 * Can be added to any task.
+	 * @see AbstractBndGradleObject#getFailOnError()
+	 */
+	public static abstract class GenericCheckErrorsAction extends AbstractBndGradleObject implements Action<Task> {
+
+		@Override
+		public void execute(final Task task) {
+			checkErrors(task.getLogger());
+		}
 	}
 }
