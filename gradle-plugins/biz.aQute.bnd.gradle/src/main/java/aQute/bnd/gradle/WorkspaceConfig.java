@@ -9,10 +9,16 @@ import org.gradle.api.provider.MapProperty;
 import org.gradle.api.provider.Property;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InvalidObjectException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Properties;
 
 /**
  * Configures a Bnd workspace.
@@ -21,13 +27,40 @@ public class WorkspaceConfig implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private final File rootDir;
+	private File rootDir;
 
 	private String cnfDir = Workspace.CNFDIR;
 
 	private boolean offline = false;
 
-	private final UTF8Properties bndProperties = new UTF8Properties();
+	private Properties bndProperties = new Properties();
+
+	/**
+	 * @see Serializable
+	 */
+	private void writeObject(ObjectOutputStream out) throws IOException {
+		out.writeObject(rootDir);
+		out.writeObject(cnfDir);
+		out.writeObject(offline);
+		out.writeObject(bndProperties);
+	}
+
+	/**
+	 * @see Serializable
+	 */
+	private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+		rootDir = (File) in.readObject();
+		cnfDir = (String) in.readObject();
+		offline = (boolean) in.readObject();
+		bndProperties = (Properties) in.readObject();
+	}
+
+	/**
+	 * @see Serializable
+	 */
+	private void readObjectNoData() throws ObjectStreamException {
+		throw new InvalidObjectException("No data");
+	}
 
 	/**
 	 * @return The workspace's root directory.
@@ -67,7 +100,7 @@ public class WorkspaceConfig implements Serializable {
 	/**
 	 * @return Properties to set on the workspace when it is created.
 	 */
-	public UTF8Properties getBndProperties() {
+	public Properties getBndProperties() {
 		return bndProperties;
 	}
 
