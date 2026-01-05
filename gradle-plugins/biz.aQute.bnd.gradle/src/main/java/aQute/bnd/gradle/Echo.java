@@ -12,6 +12,7 @@ import org.gradle.api.tasks.CompileClasspath;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputDirectory;
 import org.gradle.api.tasks.InputFiles;
+import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.PathSensitive;
 import org.gradle.api.tasks.PathSensitivity;
 import org.gradle.api.tasks.TaskAction;
@@ -63,6 +64,7 @@ public abstract class Echo extends AbstractBndWorkspaceTask {
 
 	@InputFiles
 	@Classpath
+	@Optional
 	public abstract ConfigurableFileCollection getBootstrapClasspath();
 
 	@InputFiles
@@ -73,6 +75,7 @@ public abstract class Echo extends AbstractBndWorkspaceTask {
 	public abstract Property<String> getExecutable();
 
 	@Input
+	@Optional
 	public abstract Property<Integer> getRelease();
 
 	@Input
@@ -82,6 +85,7 @@ public abstract class Echo extends AbstractBndWorkspaceTask {
 	public abstract Property<String> getTargetCompatibility();
 
 	@Input
+	@Optional
 	public abstract Property<String> getJavacProfile();
 
 	@TaskAction
