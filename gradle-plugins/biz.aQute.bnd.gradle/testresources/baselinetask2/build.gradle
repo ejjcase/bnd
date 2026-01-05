@@ -22,8 +22,9 @@ tasks.named('jar', Jar) {
 }
 
 tasks.register('echo') {
+	FileCollection baseline = configurations.baseline
 	doFirst {
-		File file = configurations.baseline.singleFile
+		File file = baseline.singleFile
 		JarFile jarFile = new JarFile(file)
 		Attributes manifest = jarFile.getManifest().getMainAttributes()
 		println "Bundle-SymbolicName: ${manifest.getValue('Bundle-SymbolicName')}"

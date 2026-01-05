@@ -21,7 +21,7 @@ class TestBaselineTask extends Specification {
 		when:
 		def result = TestHelper.getGradleRunner()
 				.withProjectDir(testProjectDir)
-				.withArguments("--parallel", "--stacktrace", "--debug", "baseline", "baselineSelf", "baselineDiffpackages", "baselineDiffignore")
+				.withArguments("--configuration-cache", "--parallel", "--stacktrace", "--debug", "baseline", "baselineSelf", "baselineDiffpackages", "baselineDiffignore")
 				.withPluginClasspath()
 				.forwardOutput()
 				.build()
@@ -55,7 +55,7 @@ class TestBaselineTask extends Specification {
 		when:
 		def result = TestHelper.getGradleRunner()
 				.withProjectDir(testProjectDir)
-				.withArguments("--parallel", "--stacktrace", "echo")
+				.withArguments("--configuration-cache", "--parallel", "--stacktrace", "echo")
 				.withPluginClasspath()
 				.forwardOutput()
 				.build()
@@ -77,7 +77,7 @@ class TestBaselineTask extends Specification {
 		when:
 		def result = TestHelper.getGradleRunner()
 				.withProjectDir(testProjectDir)
-				.withArguments("--parallel", "--stacktrace", "tasks", "baseline")
+				.withArguments("--configuration-cache", "--parallel", "--stacktrace", "tasks", "baseline")
 				.withPluginClasspath()
 				.forwardOutput()
 				.build()
@@ -101,7 +101,7 @@ class TestBaselineTask extends Specification {
 		when:
 		def result = TestHelper.getGradleRunner()
 				.withProjectDir(testProjectDir)
-				.withArguments("--parallel", "--stacktrace", "--debug", "baseline")
+				.withArguments("--configuration-cache", "--parallel", "--stacktrace", "--debug", "baseline")
 				.withPluginClasspath()
 				.forwardOutput()
 				.build()
