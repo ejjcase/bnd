@@ -712,74 +712,41 @@ public class BndPlugin implements Plugin<Project> {
 			});
 
 			Collection<aQute.bnd.build.Project> dependson = bndProject.getDependson();
-			TaskProvider<Task> echo = tasks.register("echo", t -> {
+			TaskProvider<Echo> echo = tasks.register("echo", Echo.class, t -> {
 				t.setDescription("Displays the bnd project information.");
 				t.setGroup(HelpTasksPlugin.HELP_GROUP);
-				JavaCompile compileJava = unwrap(tasks.named(JavaPlugin.COMPILE_JAVA_TASK_NAME, JavaCompile.class));
-				JavaCompile compileTestJava = unwrap(
-					tasks.named(JavaPlugin.COMPILE_TEST_JAVA_TASK_NAME, JavaCompile.class));
-				t.doLast("echo", new Action<>() {
-					@Override
-					public void execute(Task tt) {
-						try (Formatter f = new Formatter()) {
-							f.format("------------------------------------------------------------%n");
-							f.format("Project %s // Bnd version %s%n", project.getName(), About.getBndVersion());
-							f.format("------------------------------------------------------------%n");
-							f.format("%n");
-							f.format("project.workspace:      %s%n", workspace.getLayout()
-								.getProjectDirectory());
-							f.format("project.name:           %s%n", project.getName());
-							f.format("project.dir:            %s%n", layout.getProjectDirectory());
-							f.format("target:                 %s%n", unwrap(layout.getBuildDirectory()));
-							f.format("project.dependson:      %s%n", dependson);
-							f.format("project.sourcepath:     %s%n",
-								sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME)
-									.getAllSource()
-									.getSourceDirectories()
-									.getAsPath());
-							f.format("project.output:         %s%n", unwrap(compileJava.getDestinationDirectory()));
-							f.format("project.buildpath:      %s%n", compileJava.getClasspath()
-								.getAsPath());
-							f.format("project.allsourcepath:  %s%n", allSrcDirs.getAsPath());
-							f.format("project.testsrc:        %s%n",
-								sourceSets.getByName(SourceSet.TEST_SOURCE_SET_NAME)
-									.getAllSource()
-									.getSourceDirectories()
-									.getAsPath());
-							f.format("project.testoutput:     %s%n", unwrap(compileTestJava.getDestinationDirectory()));
-							f.format("project.testpath:       %s%n", compileTestJava.getClasspath()
-								.getAsPath());
-							if (Objects.nonNull(compileJava.getOptions()
-								.getBootstrapClasspath())) {
-								f.format("project.bootclasspath:  %s%n", compileJava.getOptions()
-									.getBootstrapClasspath()
-									.getAsPath());
-							}
-							f.format("project.deliverables:   %s%n", deliverables.getFiles());
-							String executable = Optional.ofNullable(compileJava.getOptions()
-								.getForkOptions()
-								.getExecutable())
-								.orElseGet(() -> compileJava.getJavaCompiler()
-									.map(javaCompiler -> IO.absolutePath(unwrapFile(javaCompiler.getExecutablePath())))
-									.getOrElse("javac"));
-							f.format("javac:                  %s%n", executable);
-							if (compileJava.getOptions()
-								.getRelease()
-								.isPresent()) {
-								f.format("--release:              %s%n", unwrap(compileJava.getOptions()
-									.getRelease()));
-							} else {
-								f.format("-source:                %s%n", compileJava.getSourceCompatibility());
-								f.format("-target:                %s%n", compileJava.getTargetCompatibility());
-							}
-							if (javacProfile.isPresent()) {
-								f.format("-profile:               %s%n", javacProfile.get());
-							}
-							System.out.print(f.toString());
-						}
-						checkErrors(tt.getLogger(), true);
-					}
-				});
+				t.getSourceDirectories().from(sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME)
+					.getAllSource()
+					.getSourceDirectories());
+				t.getTestSourceDirectories().from(sourceSets.getByName(SourceSet.TEST_SOURCE_SET_NAME)
+					.getAllSource()
+					.getSourceDirectories());
+
+				TaskProvider<JavaCompile> compileJava = tasks.named(JavaPlugin.COMPILE_JAVA_TASK_NAME, JavaCompile.class);
+				t.getCompileDestinationDirectory().set(compileJava.flatMap(JavaCompile::getDestinationDirectory));
+				t.getCompileClasspath().from(compileJava.map(JavaCompile::getClasspath));
+				t.getBootstrapClasspath().from(compileJava.map(cj -> cj.getOptions().getBootstrapClasspath()));
+
+				TaskProvider<JavaCompile> compileTestJava = tasks.named(JavaPlugin.COMPILE_TEST_JAVA_TASK_NAME, JavaCompile.class);
+				t.getTestCompileDestinationDirectory().set(compileTestJava.flatMap(JavaCompile::getDestinationDirectory));
+				t.getTestClasspath().from(compileTestJava.map(JavaCompile::getClasspath));
+
+				t.getAllSrcDirs().from(allSrcDirs);
+				t.getDeliverables().from(deliverables);
+
+				t.getExecutable().set(compileJava.map(cj ->
+					Optional.ofNullable(cj.getOptions()
+							.getForkOptions()
+							.getExecutable())
+						.orElseGet(() -> cj.getJavaCompiler()
+							.map(javaCompiler -> IO.absolutePath(unwrapFile(javaCompiler.getExecutablePath())))
+							.getOrElse("javac"))));
+
+				t.getRelease().set(compileJava.flatMap(cj -> cj.getOptions().getRelease()));
+				t.getSourceCompatibility().set(compileJava.map(JavaCompile::getSourceCompatibility));
+				t.getTargetCompatibility().set(compileJava.map(JavaCompile::getTargetCompatibility));
+
+				javacProfile.ifPresent(s -> t.getJavacProfile().set(s));
 			});
 
 			TaskProvider<Task> bndproperties = tasks.register("bndproperties", t -> {
