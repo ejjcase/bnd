@@ -539,8 +539,8 @@ public class BndPlugin implements Plugin<Project> {
 						.count();
 
 					// helpful while you validate:
-					project.getLogger()
-						.lifecycle("bnd: release tasks in execution graph = {}", count);
+					//project.getLogger()
+					//	.lifecycle("bnd: release tasks in execution graph = {}", count);
 
 					releaseCounter.get()
 						.setInitialCount((int) count);

@@ -11,8 +11,6 @@ import org.gradle.api.tasks.PathSensitivity;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.work.DisableCachingByDefault;
 
-import static org.gradle.api.plugins.JavaPlugin.JAR_TASK_NAME;
-
 /**
  * Release a Bnd project.
  */
@@ -39,13 +37,13 @@ public abstract class Release extends AbstractBndWorkspaceTask {
 
 			if (!isLastBundle) {
 				getLogger()
-					.lifecycle("bnd: Release bundle ({}) {}", count, JAR_TASK_NAME);
+					.lifecycle("bnd: Release bundle ({}) {}", count, bndProject.getName());
 				bndProject.release();
 			} else {
 				// releasing last bundle in workspace (special
 				// case for sonatype release)
 				getLogger()
-					.lifecycle("bnd: Last release bundle ({}) {}", count, JAR_TASK_NAME);
+					.lifecycle("bnd: Last release bundle ({}) {}", count, bndProject.getName());
 				bndProject.release(new Project.ReleaseParameter(null, false, true));
 			}
 		} catch (Exception e) {
