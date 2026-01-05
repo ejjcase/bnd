@@ -725,7 +725,9 @@ public class BndPlugin implements Plugin<Project> {
 				TaskProvider<JavaCompile> compileJava = tasks.named(JavaPlugin.COMPILE_JAVA_TASK_NAME, JavaCompile.class);
 				t.getCompileDestinationDirectory().set(compileJava.flatMap(JavaCompile::getDestinationDirectory));
 				t.getCompileClasspath().from(compileJava.map(JavaCompile::getClasspath));
-				t.getBootstrapClasspath().from(compileJava.map(cj -> cj.getOptions().getBootstrapClasspath()));
+				t.getBootstrapClasspath().from(compileJava.map(cj ->
+					Optional.ofNullable(cj.getOptions().getBootstrapClasspath())
+						.orElse(objects.fileCollection())));
 
 				TaskProvider<JavaCompile> compileTestJava = tasks.named(JavaPlugin.COMPILE_TEST_JAVA_TASK_NAME, JavaCompile.class);
 				t.getTestCompileDestinationDirectory().set(compileTestJava.flatMap(JavaCompile::getDestinationDirectory));
