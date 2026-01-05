@@ -749,27 +749,9 @@ public class BndPlugin implements Plugin<Project> {
 				javacProfile.ifPresent(s -> t.getJavacProfile().set(s));
 			});
 
-			TaskProvider<Task> bndproperties = tasks.register("bndproperties", t -> {
+			TaskProvider<BndProperties> bndproperties = tasks.register("bndproperties", BndProperties.class, t -> {
 				t.setDescription("Displays the bnd properties.");
 				t.setGroup(HelpTasksPlugin.HELP_GROUP);
-				t.doLast("bndproperties", new Action<>() {
-					@Override
-					public void execute(Task tt) {
-						try (Formatter f = new Formatter()) {
-							f.format("------------------------------------------------------------%n");
-							f.format("Project %s // Bnd version %s%n", project.getName(), About.getBndVersion());
-							f.format("------------------------------------------------------------%n");
-							f.format("%n");
-							bndProject.getPropertyKeys(true)
-								.stream()
-								.sorted()
-								.forEachOrdered(key -> f.format("%s: %s%n", key, bndProject.getProperty(key, "")));
-							f.format("%n");
-							System.out.print(f.toString());
-						}
-						checkErrors(tt.getLogger(), true);
-					}
-				});
 			});
 
 			// Depend upon an output dir to avoid parallel task execution.
