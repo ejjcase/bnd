@@ -1,12 +1,7 @@
 package aQute.bnd.gradle;
 
-import aQute.bnd.build.Project;
 import aQute.bnd.build.Workspace;
 import aQute.bnd.osgi.Constants;
-import aQute.lib.utf8properties.UTF8Properties;
-import org.gradle.api.file.DirectoryProperty;
-import org.gradle.api.provider.MapProperty;
-import org.gradle.api.provider.Property;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,9 +10,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Properties;
 
 /**
