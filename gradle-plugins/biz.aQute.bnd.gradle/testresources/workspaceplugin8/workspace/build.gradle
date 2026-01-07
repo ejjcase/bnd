@@ -4,6 +4,9 @@
  * Depends on bndPlugin property set by settings.gradle.
  * and bnd_* values from gradle.properties.
  */
+import aQute.bnd.build.Workspace
+import aQute.bnd.gradle.BndWorkspaceService
+import org.gradle.api.services.ServiceReference
 
 buildscript {
 	dependencies {
@@ -13,15 +16,39 @@ buildscript {
 
 apply plugin: 'biz.aQute.bnd.workspace'
 
-var project_ext = project.ext
-var project_name = project.name
-var project_path = project.path
+abstract class Build extends DefaultTask {
 
-tasks.register('build') {
-	doLast {
-		if (!project_ext.has('bndWorkspace')) {
+	@ServiceReference
+	@Optional
+	abstract Property<BndWorkspaceService> getBndWorkspaceService()
+
+	@Input
+	abstract Property<String> getProjectName()
+
+	@Input
+	abstract Property<String> getProjectPath()
+
+	@Internal
+	abstract DirectoryProperty getProjectDirectory()
+
+	@Internal
+	Provider<Workspace> getBndWorkspace() {
+		return getBndWorkspaceService().zip(getProjectDirectory().asFile) { service, dir ->
+			service.getWorkspace(dir).orElse(null)
+		}
+	}
+
+	@TaskAction
+	void execute() {
+		if (!getBndWorkspace().isPresent()) {
 			throw new GradleException("workspace does not have a Bnd Workspace")
 		}
-		println "### Project ${project_name} ${project_path} ${bndWorkspace}"
+		println "### Project ${projectName.get()} ${projectPath.get()} ${bndWorkspace.get()}"
 	}
+}
+
+tasks.register('build', Build) {
+	getProjectName().set(project.name)
+	getProjectPath().set(project.path)
+	getProjectDirectory().set(layout.projectDirectory)
 }

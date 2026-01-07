@@ -6,8 +6,9 @@ var project_name = project.name
 var project_path = project.path
 
 tasks.register('build') {
+	boolean extHasBndWorkspace = project_ext.has('bndWorkspace')
 	doLast {
-		if (project_ext.has('bndWorkspace')) {
+		if (extHasBndWorkspace) {
 			throw new GradleException("rootProject has a Bnd Workspace")
 		}
 		println "### Project ${project_name} ${project_path} is rootProject"
