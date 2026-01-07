@@ -26,7 +26,7 @@ public abstract class AbstractBndTask extends DefaultTask {
 	}
 
 	@Internal
-	String getProjectName() {
+	public String getProjectName() {
 		return projectName;
 	}
 
@@ -35,13 +35,13 @@ public abstract class AbstractBndTask extends DefaultTask {
 	public abstract Property<BndWorkspaceService> getBndWorkspaceService();
 
 	@Internal
-	Optional<Workspace> getBndWorkspace() {
+	public Optional<Workspace> getBndWorkspace() {
 		return unwrapOptional(getBndWorkspaceService())
 			.flatMap(service -> service.getAncestorWorkspace(projectDir));
 	}
 
 	@Internal
-	Optional<Project> getBndProject() {
+	public Optional<Project> getBndProject() {
 		return getBndWorkspace().map(ws -> ws.getProject(getProjectName()));
 	}
 }
