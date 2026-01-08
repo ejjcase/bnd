@@ -4,22 +4,17 @@ import static aQute.bnd.gradle.BndUtils.checkProjectErrors;
 import static aQute.bnd.gradle.BndUtils.isGradleCompatible;
 import static aQute.bnd.gradle.BndUtils.jarLibraryElements;
 import static aQute.bnd.gradle.BndUtils.sourceSets;
-import static aQute.bnd.gradle.BndUtils.unwrap;
 import static aQute.bnd.gradle.BndUtils.unwrapFile;
 import static aQute.bnd.osgi.Processor.isTrue;
 import static aQute.bnd.osgi.Processor.removeDuplicateMarker;
-import static java.lang.invoke.MethodHandles.publicLookup;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.gradle.api.tasks.PathSensitivity.RELATIVE;
 
 import java.io.File;
-import java.lang.invoke.MethodHandle;
-import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Formatter;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,12 +24,10 @@ import java.util.stream.StreamSupport;
 
 import aQute.bnd.build.Container;
 import aQute.bnd.build.Container.TYPE;
-import aQute.bnd.build.Project.ReleaseParameter;
 import aQute.bnd.build.Workspace;
 import aQute.bnd.exceptions.Exceptions;
 import aQute.bnd.exporter.executable.ExecutableJarExporter;
 import aQute.bnd.exporter.runbundles.RunbundlesExporter;
-import aQute.bnd.osgi.About;
 import aQute.bnd.osgi.Constants;
 import aQute.bnd.stream.MapStream;
 import aQute.bnd.unmodifiable.Maps;
@@ -80,7 +73,6 @@ import org.gradle.api.tasks.compile.JavaCompile;
 import org.gradle.api.tasks.testing.AbstractTestTask;
 import org.gradle.language.base.plugins.LifecycleBasePlugin;
 import org.gradle.process.CommandLineArgumentProvider;
-import org.slf4j.LoggerFactory;
 
 /**
  * BndPlugin for Gradle.
@@ -93,7 +85,6 @@ import org.slf4j.LoggerFactory;
  * task.
  */
 public class BndPlugin implements Plugin<Project> {
-	private static final org.slf4j.Logger	logger		= LoggerFactory.getLogger(BndPlugin.class);
 	/**
 	 * Name of the plugin.
 	 */
@@ -137,7 +128,8 @@ public class BndPlugin implements Plugin<Project> {
 			}
 			bndProject.prepare();
 			if (!bndProject.isValid()) {
-				checkErrors(project.getLogger());
+				Logger logger1 = project.getLogger();
+				checkProjectErrors(this.bndProject, logger1, false);
 				throw new GradleException(String.format("Project %s is not a valid bnd project", bndProject.getName()));
 			}
 			BndPluginExtension extension = project.getExtensions()
@@ -711,7 +703,6 @@ public class BndPlugin implements Plugin<Project> {
 				});
 			});
 
-			Collection<aQute.bnd.build.Project> dependson = bndProject.getDependson();
 			TaskProvider<Echo> echo = tasks.register("echo", Echo.class, t -> {
 				t.setDescription("Displays the bnd project information.");
 				t.setGroup(HelpTasksPlugin.HELP_GROUP);
@@ -844,33 +835,8 @@ public class BndPlugin implements Plugin<Project> {
 				bndProject.getIncluded());
 	}
 
-	private void checkErrors(Logger logger) {
-		checkProjectErrors(bndProject, logger, false);
-	}
-
-	private void checkErrors(Logger logger, boolean ignoreFailures) {
-		checkProjectErrors(bndProject, logger, ignoreFailures);
-	}
-
 	private static Optional<String> optional(String value) {
 		return Optional.ofNullable(value).filter(Strings::notEmpty);
-	}
-
-	private static Object getter(Object target, String name) {
-		try {
-			String getterSuffix = Character.toUpperCase(name.charAt(0)) + name.substring(1);
-			Class<?> targetClass = target.getClass();
-			while (!Modifier.isPublic(targetClass.getModifiers())) {
-				targetClass = targetClass.getSuperclass();
-			}
-			MethodHandle mh = publicLookup().unreflect(targetClass.getMethod("get" + getterSuffix));
-			return mh.invoke(target);
-		} catch (Error e) {
-			throw e;
-		} catch (Throwable e) {
-			logger.debug("Could not find getter method for field {}", name, e);
-		}
-		return null;
 	}
 
 	private <T extends AbstractBndGradleObject> T createBndGradleObject(Class<T> klass) {
