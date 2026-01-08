@@ -24,7 +24,7 @@ class TestBndrunTask extends Specification {
 		when:
 		def result = TestHelper.getGradleRunner()
 				.withProjectDir(testProjectDir)
-				.withArguments("--parallel", "--stacktrace", "--debug", "build", taskname)
+				.withArguments("--configuration-cache", "--parallel", "--stacktrace", "--debug", "build", taskname)
 				.withPluginClasspath()
 				.forwardOutput()
 				.build()
