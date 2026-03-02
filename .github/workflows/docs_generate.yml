@@ -30,19 +30,19 @@ jobs:
 
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76
+      uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b
       with:
         egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
 
     - name: Checkout master
-      uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
       with:
         ref: master
         fetch-depth: 0
         token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Set up Java
-      uses: actions/setup-java@f2beeb24e141e01a676f977032f5a29d81c9e27e
+      uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654
       with:
         distribution: 'temurin'
         java-version: 17

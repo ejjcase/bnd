@@ -37,11 +37,11 @@ jobs:
       BUNDLE_PATH: vendor/bundle
     steps:
     - name: Git Checkout
-      uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
       with:
         ref: next
     - name: Set up Ruby
-      uses: ruby/setup-ruby@ed55d55e820a01da7d3e4863a8c51a61d73c3228
+      uses: ruby/setup-ruby@09a7688d3b55cf0e976497ff046b70949eeaccfd
       with:
         ruby-version: 3.4.5
         bundler-cache: true
@@ -61,7 +61,7 @@ jobs:
         rm -rf _site/releases
         find _site -type f ! -name "*.html" -exec rm -f {} +
 
-    - uses: actions/upload-artifact@v5
+    - uses: actions/upload-artifact@v7.0.0
       with:
         name: releasedocs
         path: docs/_site/
@@ -107,12 +107,12 @@ jobs:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
     - name: checkout master
-      uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
       with:
         ref: master
 
     - name: download docs/releases/${{ github.event.inputs.V1 }}
-      uses: actions/download-artifact@v7.0.0
+      uses: actions/download-artifact@v8.0.0
       with:
         name: releasedocs
         path: docs/releases/${{ github.event.inputs.V1 }}/

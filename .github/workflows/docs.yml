@@ -11,6 +11,7 @@ on:
     paths:
     - 'docs/**'
     - '.github/**/*docs*'
+  workflow_dispatch:
 
 env:
   LC_ALL: en_US.UTF-8
@@ -33,14 +34,14 @@ jobs:
       BUNDLE_PATH: vendor/bundle
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76
+      uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b
       with:
         egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
 
     - name: Git Checkout
-      uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
     - name: Set up Ruby
-      uses: ruby/setup-ruby@ed55d55e820a01da7d3e4863a8c51a61d73c3228
+      uses: ruby/setup-ruby@09a7688d3b55cf0e976497ff046b70949eeaccfd
       with:
         ruby-version: 3.4.5
         bundler-cache: true
