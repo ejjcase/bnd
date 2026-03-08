@@ -34,14 +34,14 @@ jobs:
       BUNDLE_PATH: vendor/bundle
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b
+      uses: step-security/harden-runner@58077d3c7e43986b6b15fba718e8ea69e387dfcc
       with:
         egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
 
     - name: Git Checkout
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
     - name: Set up Ruby
-      uses: ruby/setup-ruby@09a7688d3b55cf0e976497ff046b70949eeaccfd
+      uses: ruby/setup-ruby@6ca151fd1bfcfd6fe0c4eb6837eb0584d0134a0c
       with:
         ruby-version: 3.4.5
         bundler-cache: true
