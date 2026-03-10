@@ -7,6 +7,7 @@ import java.util.jar.Attributes
 import java.util.jar.JarFile
 import java.util.zip.GZIPInputStream
 
+import static aQute.bnd.gradle.TestHelper.STANDARD_GRADLE_ARGS
 import static aQute.bnd.gradle.TestHelper.formatTime
 import static org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import static org.gradle.testkit.runner.TaskOutcome.UP_TO_DATE
@@ -26,7 +27,7 @@ class TestIndexTask extends Specification {
 		when:
 		def result = TestHelper.getGradleRunner()
 				.withProjectDir(testProjectDir)
-				.withArguments("--parallel", "--stacktrace", "--debug", "indexer", "indexer2")
+				.withArguments(STANDARD_GRADLE_ARGS + ["indexer", "indexer2"])
 				.withPluginClasspath()
 				.forwardOutput()
 				.build()
@@ -137,7 +138,7 @@ class TestIndexTask extends Specification {
 		when:
 		result = TestHelper.getGradleRunner()
 				.withProjectDir(testProjectDir)
-				.withArguments("--parallel", "--stacktrace", "--debug", "indexer", "indexer2")
+				.withArguments(STANDARD_GRADLE_ARGS + ["indexer", "indexer2"])
 				.withPluginClasspath()
 				.forwardOutput()
 				.build()

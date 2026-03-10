@@ -6,6 +6,7 @@ import spock.lang.Specification
 import java.util.jar.Attributes
 import java.util.jar.JarFile
 
+import static aQute.bnd.gradle.TestHelper.STANDARD_GRADLE_ARGS
 import static org.gradle.testkit.runner.TaskOutcome.FAILED
 import static org.gradle.testkit.runner.TaskOutcome.SUCCESS
 
@@ -26,7 +27,7 @@ class TestTestOSGiTask extends Specification {
 		when:
 		def result = TestHelper.getGradleRunner()
 				.withProjectDir(testProjectDir)
-				.withArguments("-Pbnd_version=${bnd_version}", "--parallel", "--stacktrace", "--debug", "build")
+				.withArguments(STANDARD_GRADLE_ARGS + ["-Pbnd_version=${bnd_version}", "build"])
 				.withPluginClasspath()
 				.forwardOutput()
 				.build()
@@ -101,7 +102,7 @@ class TestTestOSGiTask extends Specification {
 		when:
 		def result = TestHelper.getGradleRunner()
 				.withProjectDir(testProjectDir)
-				.withArguments("-Pbnd_version=${bnd_version}", "--parallel", "--stacktrace", "--debug", "build")
+				.withArguments(STANDARD_GRADLE_ARGS + ["-Pbnd_version=${bnd_version}", "build"])
 				.withPluginClasspath()
 				.forwardOutput()
 				.build()
@@ -152,7 +153,7 @@ class TestTestOSGiTask extends Specification {
 		when:
 		def result = TestHelper.getGradleRunner()
 				.withProjectDir(testProjectDir)
-				.withArguments("-Pbnd_version=${bnd_version}", "--parallel", "--stacktrace", "--debug", "build")
+				.withArguments(STANDARD_GRADLE_ARGS + ["-Pbnd_version=${bnd_version}", "build"])
 				.withPluginClasspath()
 				.forwardOutput()
 				.build()
@@ -201,7 +202,7 @@ class TestTestOSGiTask extends Specification {
 		when:
 		def result = TestHelper.getGradleRunner()
 				.withProjectDir(testProjectDir)
-				.withArguments("-Pbnd_version=${bnd_version}", "--parallel", "--stacktrace", "--debug", "--continue", "build")
+				.withArguments(STANDARD_GRADLE_ARGS + ["-Pbnd_version=${bnd_version}", "--continue", "build"])
 				.withPluginClasspath()
 				.forwardOutput()
 				.buildAndFail()

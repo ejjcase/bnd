@@ -14,6 +14,9 @@ class TestHelper {
 	private final static TimeZone DEFAULT_TIME_ZONE = TimeZone.getDefault();
 	private final static ZoneId UTC_ZONE_ID = ZoneId.of("UTC");
 
+	public final static String[] STANDARD_GRADLE_ARGS_QUIET = ["--parallel", "--stacktrace", "--configuration-cache"];
+	public final static String[] STANDARD_GRADLE_ARGS = STANDARD_GRADLE_ARGS_QUIET + ["--debug"];
+
 	private TestHelper() { }
 
 	public static GradleRunner getGradleRunner() {

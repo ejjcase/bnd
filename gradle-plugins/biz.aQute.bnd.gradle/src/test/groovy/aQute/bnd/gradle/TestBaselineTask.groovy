@@ -4,6 +4,8 @@ import spock.lang.Specification
 
 import java.util.regex.Pattern
 
+import static aQute.bnd.gradle.TestHelper.STANDARD_GRADLE_ARGS
+import static aQute.bnd.gradle.TestHelper.STANDARD_GRADLE_ARGS_QUIET
 import static org.gradle.testkit.runner.TaskOutcome.SUCCESS
 
 class TestBaselineTask extends Specification {
@@ -21,7 +23,7 @@ class TestBaselineTask extends Specification {
 		when:
 		def result = TestHelper.getGradleRunner()
 				.withProjectDir(testProjectDir)
-				.withArguments("--configuration-cache", "--parallel", "--stacktrace", "--debug", "baseline", "baselineSelf", "baselineDiffpackages", "baselineDiffignore")
+				.withArguments(STANDARD_GRADLE_ARGS + ["baseline", "baselineSelf", "baselineDiffpackages", "baselineDiffignore"])
 				.withPluginClasspath()
 				.forwardOutput()
 				.build()
@@ -55,7 +57,7 @@ class TestBaselineTask extends Specification {
 		when:
 		def result = TestHelper.getGradleRunner()
 				.withProjectDir(testProjectDir)
-				.withArguments("--configuration-cache", "--parallel", "--stacktrace", "echo")
+				.withArguments(STANDARD_GRADLE_ARGS_QUIET + ["echo"])
 				.withPluginClasspath()
 				.forwardOutput()
 				.build()
@@ -77,7 +79,7 @@ class TestBaselineTask extends Specification {
 		when:
 		def result = TestHelper.getGradleRunner()
 				.withProjectDir(testProjectDir)
-				.withArguments("--configuration-cache", "--parallel", "--stacktrace", "tasks", "baseline")
+				.withArguments(STANDARD_GRADLE_ARGS_QUIET + ["tasks", "baseline"])
 				.withPluginClasspath()
 				.forwardOutput()
 				.build()
@@ -101,7 +103,7 @@ class TestBaselineTask extends Specification {
 		when:
 		def result = TestHelper.getGradleRunner()
 				.withProjectDir(testProjectDir)
-				.withArguments("--configuration-cache", "--parallel", "--stacktrace", "--debug", "baseline")
+				.withArguments(STANDARD_GRADLE_ARGS + ["baseline"])
 				.withPluginClasspath()
 				.forwardOutput()
 				.build()

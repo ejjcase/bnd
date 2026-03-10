@@ -6,6 +6,7 @@ import java.util.jar.Attributes
 import java.util.jar.JarFile
 import java.util.regex.Pattern
 
+import static aQute.bnd.gradle.TestHelper.STANDARD_GRADLE_ARGS
 import static org.gradle.testkit.runner.TaskOutcome.SUCCESS
 
 class TestBndrunTask extends Specification {
@@ -24,7 +25,7 @@ class TestBndrunTask extends Specification {
 		when:
 		def result = TestHelper.getGradleRunner()
 				.withProjectDir(testProjectDir)
-				.withArguments("--configuration-cache", "--parallel", "--stacktrace", "--debug", "build", taskname)
+				.withArguments(STANDARD_GRADLE_ARGS + ["build", taskname])
 				.withPluginClasspath()
 				.forwardOutput()
 				.build()

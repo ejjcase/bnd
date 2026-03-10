@@ -8,6 +8,8 @@ import java.util.jar.Attributes
 import java.util.jar.JarFile
 import java.util.regex.Pattern
 
+import static aQute.bnd.gradle.TestHelper.STANDARD_GRADLE_ARGS
+import static aQute.bnd.gradle.TestHelper.STANDARD_GRADLE_ARGS_QUIET
 import static org.gradle.testkit.runner.TaskOutcome.FAILED
 import static org.gradle.testkit.runner.TaskOutcome.SUCCESS
 
@@ -37,7 +39,7 @@ class TestBndPlugin extends Specification {
 		when:
 		def result = TestHelper.getGradleRunner()
 				.withProjectDir(testProjectDir)
-				.withArguments("-Pbnd_plugin=${pluginClasspath}", "--configuration-cache", "--parallel", "--stacktrace", "--debug", "build", "release")
+				.withArguments(STANDARD_GRADLE_ARGS + ["-Pbnd_plugin=${pluginClasspath}", "build", "release"])
 				.forwardOutput()
 				.build()
 
@@ -89,7 +91,7 @@ class TestBndPlugin extends Specification {
 		when:
 		def result = TestHelper.getGradleRunner()
 				.withProjectDir(testProjectDir)
-				.withArguments("-Pbnd_plugin=${pluginClasspath}", "--configuration-cache", "--parallel", "--stacktrace", "echo", "bndproperties", ":tasks")
+				.withArguments(STANDARD_GRADLE_ARGS_QUIET + ["-Pbnd_plugin=${pluginClasspath}", "echo", "bndproperties", ":tasks"])
 				.forwardOutput()
 				.build()
 
@@ -108,7 +110,7 @@ class TestBndPlugin extends Specification {
 		when:
 		def result = TestHelper.getGradleRunner()
 				.withProjectDir(testProjectDir)
-				.withArguments("-Pbnd_plugin=${pluginClasspath}", "--configuration-cache", "--parallel", "--stacktrace", "--continue", ":test.simple:resolve", ":test.simple:resolve2")
+				.withArguments(STANDARD_GRADLE_ARGS + ["-Pbnd_plugin=${pluginClasspath}", "--continue", ":test.simple:resolve", ":test.simple:resolve2"])
 				.forwardOutput()
 				.buildAndFail()
 
@@ -176,7 +178,7 @@ class TestBndPlugin extends Specification {
 		when:
 		def result = TestHelper.getGradleRunner()
 				.withProjectDir(testProjectDir)
-				.withArguments("-Pbnd_plugin=${pluginClasspath}", "--configuration-cache", "--parallel", "--stacktrace", "--continue", ":test.simple:export", ":test.simple:runbundles", ":test.simple:export2", ":test.simple:export3")
+				.withArguments(STANDARD_GRADLE_ARGS + ["-Pbnd_plugin=${pluginClasspath}", "--continue", ":test.simple:export", ":test.simple:runbundles", ":test.simple:export2", ":test.simple:export3"])
 				.forwardOutput()
 				.build()
 
@@ -233,7 +235,7 @@ class TestBndPlugin extends Specification {
 		when:
 		def result = TestHelper.getGradleRunner()
 				.withProjectDir(testProjectDir)
-				.withArguments("-Pbnd_plugin=${pluginClasspath}", "--configuration-cache", "--parallel", "--stacktrace", ":tasks")
+				.withArguments(STANDARD_GRADLE_ARGS_QUIET + ["-Pbnd_plugin=${pluginClasspath}", ":tasks"])
 				.forwardOutput()
 				.build()
 
@@ -250,7 +252,7 @@ class TestBndPlugin extends Specification {
 		when:
 		def result = TestHelper.getGradleRunner()
 				.withProjectDir(testProjectDir)
-				.withArguments("-Pbnd_plugin=${pluginClasspath}", "--configuration-cache", "--parallel", "--stacktrace", "--debug", "build", "release")
+				.withArguments(STANDARD_GRADLE_ARGS + ["-Pbnd_plugin=${pluginClasspath}", "build", "release"])
 				.forwardOutput()
 				.build()
 
@@ -297,7 +299,7 @@ class TestBndPlugin extends Specification {
 		when:
 		def result = TestHelper.getGradleRunner()
 				.withProjectDir(testProjectDir)
-				.withArguments("-Pbnd_plugin=${pluginClasspath}", "--configuration-cache", "--parallel", "--stacktrace", "--debug", "build", "release")
+				.withArguments(STANDARD_GRADLE_ARGS + ["-Pbnd_plugin=${pluginClasspath}", "build", "release"])
 				.forwardOutput()
 				.build()
 
@@ -344,7 +346,7 @@ class TestBndPlugin extends Specification {
 		when:
 		def result = TestHelper.getGradleRunner()
 				.withProjectDir(testProjectDir)
-				.withArguments("-Pbnd_plugin=${pluginClasspath}", "--configuration-cache", "--parallel", "--stacktrace", "--debug", "build", "release")
+				.withArguments(STANDARD_GRADLE_ARGS + ["-Pbnd_plugin=${pluginClasspath}", "build", "release"])
 				.forwardOutput()
 				.build()
 
@@ -396,7 +398,7 @@ class TestBndPlugin extends Specification {
 		when:
 		def result = TestHelper.getGradleRunner()
 				.withProjectDir(testProjectDir)
-				.withArguments("-Pbnd_plugin=${pluginClasspath}", "--configuration-cache", "--parallel", "--stacktrace", "--debug", "check", "--exclude-task", "testrun.testOSGi2")
+				.withArguments(STANDARD_GRADLE_ARGS + ["-Pbnd_plugin=${pluginClasspath}", "check", "--exclude-task", "testrun.testOSGi2"])
 				.forwardOutput()
 				.build()
 
@@ -435,7 +437,7 @@ class TestBndPlugin extends Specification {
 		when:
 		result = TestHelper.getGradleRunner()
 				.withProjectDir(testProjectDir)
-				.withArguments("-Pbnd_plugin=${pluginClasspath}", "--configuration-cache", "--parallel", "--stacktrace", "--debug", "testrun.testOSGi2")
+				.withArguments(STANDARD_GRADLE_ARGS + ["-Pbnd_plugin=${pluginClasspath}", "testrun.testOSGi2"])
 				.forwardOutput()
 				.buildAndFail()
 
@@ -445,7 +447,7 @@ class TestBndPlugin extends Specification {
 		when:
 		result = TestHelper.getGradleRunner()
 				.withProjectDir(testProjectDir)
-				.withArguments("-Pbnd_plugin=${pluginClasspath}", "--configuration-cache", "--parallel", "--stacktrace", "--debug", "testrun.testOSGi2", "--tests=test.simple.Test")
+				.withArguments(STANDARD_GRADLE_ARGS + ["-Pbnd_plugin=${pluginClasspath}", "testrun.testOSGi2", "--tests=test.simple.Test"])
 				.forwardOutput()
 				.build()
 
@@ -455,7 +457,7 @@ class TestBndPlugin extends Specification {
 		when:
 		result = TestHelper.getGradleRunner()
 				.withProjectDir(testProjectDir)
-				.withArguments("-Pbnd_plugin=${pluginClasspath}", "--configuration-cache", "--parallel", "--stacktrace", "--debug", "testrun.testOSGi2", "--tests=test.simple.ProjectNameTest")
+				.withArguments(STANDARD_GRADLE_ARGS + ["-Pbnd_plugin=${pluginClasspath}", "testrun.testOSGi2", "--tests=test.simple.ProjectNameTest"])
 				.forwardOutput()
 				.build()
 
@@ -474,7 +476,7 @@ class TestBndPlugin extends Specification {
 		when:
 		def result = TestHelper.getGradleRunner()
 				.withProjectDir(testProjectDir)
-				.withArguments("-Pbnd_plugin=${pluginClasspath}", "--configuration-cache", "--parallel", "--stacktrace", "--debug", "build", "release")
+				.withArguments(STANDARD_GRADLE_ARGS + ["-Pbnd_plugin=${pluginClasspath}", "build", "release"])
 				.forwardOutput()
 				.build()
 
@@ -505,7 +507,7 @@ class TestBndPlugin extends Specification {
 		when:
 		result = TestHelper.getGradleRunner()
 				.withProjectDir(testProjectDir)
-				.withArguments("-Pbnd_plugin=${pluginClasspath}", "--configuration-cache", "--parallel", "--stacktrace", "--debug", "clean")
+				.withArguments(STANDARD_GRADLE_ARGS + ["-Pbnd_plugin=${pluginClasspath}", "clean"])
 				.forwardOutput()
 				.build()
 

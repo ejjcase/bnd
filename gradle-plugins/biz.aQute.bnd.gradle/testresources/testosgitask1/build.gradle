@@ -28,7 +28,10 @@ dependencies {
 def resolveTask = tasks.register('resolve', Resolve) {
 	description = 'Resolve testosgi.bndrun'
 	group = 'test'
-	inputs.files tasks.withType(Jar)
+	def inputJars = objects.fileCollection()
+	ext.set('inputJars', inputJars)
+	inputJars.from(tasks.withType(Jar))
+	inputs.files inputJars
 	bndrun = file('testosgi.bndrun')
 	outputBndrun = layout.buildDirectory.file('testosgi.bndrun')
 }

@@ -4,6 +4,7 @@ import aQute.lib.utf8properties.UTF8Properties
 import aQute.libg.reporter.slf4j.Slf4jReporter
 import spock.lang.Specification
 
+import static aQute.bnd.gradle.TestHelper.STANDARD_GRADLE_ARGS
 import static org.gradle.testkit.runner.TaskOutcome.FAILED
 import static org.gradle.testkit.runner.TaskOutcome.SUCCESS
 
@@ -34,7 +35,7 @@ class TestResolveTask extends Specification {
 		props = new UTF8Properties()
 		def result = TestHelper.getGradleRunner()
 				.withProjectDir(testProjectDir)
-				.withArguments("--parallel", "--stacktrace", "--debug", taskname)
+				.withArguments(STANDARD_GRADLE_ARGS + taskname)
 				.withPluginClasspath()
 				.forwardOutput()
 				.build()
@@ -76,7 +77,7 @@ class TestResolveTask extends Specification {
 		props = new UTF8Properties()
 		def result = TestHelper.getGradleRunner()
 				.withProjectDir(testProjectDir)
-				.withArguments("--parallel", "--stacktrace", "--debug", taskname)
+				.withArguments(STANDARD_GRADLE_ARGS + taskname)
 				.withPluginClasspath()
 				.forwardOutput()
 				.build()
@@ -109,7 +110,7 @@ class TestResolveTask extends Specification {
 		props = new UTF8Properties()
 		def result = TestHelper.getGradleRunner()
 				.withProjectDir(testProjectDir)
-				.withArguments("--parallel", "--stacktrace", "--debug", taskname)
+				.withArguments(STANDARD_GRADLE_ARGS + taskname)
 				.withPluginClasspath()
 				.forwardOutput()
 				.buildAndFail()
@@ -143,7 +144,7 @@ class TestResolveTask extends Specification {
 		props = new UTF8Properties()
 		def result = TestHelper.getGradleRunner()
 				.withProjectDir(testProjectDir)
-				.withArguments("--parallel", "--stacktrace", "--debug", taskname)
+				.withArguments(STANDARD_GRADLE_ARGS + taskname)
 				.withPluginClasspath()
 				.forwardOutput()
 				.buildAndFail()

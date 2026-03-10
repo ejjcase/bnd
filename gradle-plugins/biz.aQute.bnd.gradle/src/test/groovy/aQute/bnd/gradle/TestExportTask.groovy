@@ -7,6 +7,7 @@ import spock.lang.Specification
 import java.util.jar.Attributes
 import java.util.jar.JarFile
 
+import static aQute.bnd.gradle.TestHelper.STANDARD_GRADLE_ARGS
 import static org.gradle.testkit.runner.TaskOutcome.SUCCESS
 
 class TestExportTask extends Specification {
@@ -35,7 +36,7 @@ class TestExportTask extends Specification {
 		props = new UTF8Properties()
 		def result = TestHelper.getGradleRunner()
 				.withProjectDir(testProjectDir)
-				.withArguments("--parallel", "--stacktrace", "--debug", taskname)
+				.withArguments(STANDARD_GRADLE_ARGS + taskname)
 				.withPluginClasspath()
 				.forwardOutput()
 				.build()
@@ -85,7 +86,7 @@ class TestExportTask extends Specification {
 		props = new UTF8Properties()
 		def result = TestHelper.getGradleRunner()
 				.withProjectDir(testProjectDir)
-				.withArguments("--parallel", "--stacktrace", "--debug", taskname)
+				.withArguments(STANDARD_GRADLE_ARGS + taskname)
 				.withPluginClasspath()
 				.forwardOutput()
 				.build()
@@ -124,7 +125,7 @@ class TestExportTask extends Specification {
 		props = new UTF8Properties()
 		def result = TestHelper.getGradleRunner()
 				.withProjectDir(testProjectDir)
-				.withArguments("--parallel", "--stacktrace", "--debug", taskname)
+				.withArguments(STANDARD_GRADLE_ARGS + taskname)
 				.withPluginClasspath()
 				.forwardOutput()
 				.build()
